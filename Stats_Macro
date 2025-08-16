@@ -1,0 +1,443 @@
+Sub ExtractStats()
+    Dim inspirationSheet As Worksheet, releaseSheet As Worksheet, oscarSheet As Worksheet, ratingSheet As Worksheet, placeSheet As Worksheet, franchiseSheet As Worksheet, countrySheet As Worksheet, distributorSheet As Worksheet, productionSheet As Worksheet, mainSheet As Worksheet, directorSheet As Worksheet, producerSheet As Worksheet, writerSheet As Worksheet, actorSheet As Worksheet, genreSheet As Worksheet, cinematographerSheet As Worksheet, editorSheet As Worksheet, composerSheet As Worksheet, protagonistSheet As Worksheet
+    Dim cell As Range, value As Variant, valueCount As Long
+    Dim uniqueInspirations As New Collection, uniqueReleases As New Collection, uniqueOscars As New Collection, uniqueRatings As New Collection, uniquePlaces As New Collection, uniqueFranchises As New Collection, uniqueCountries As New Collection, uniqueDistributors As New Collection, uniqueProduction As New Collection, uniqueDirectors As New Collection, uniqueProducers As New Collection, uniqueWriters As New Collection, uniqueActors As New Collection, uniqueGenres As New Collection, uniqueCinematographers As New Collection, uniqueEditors As New Collection, uniqueComposers As New Collection, uniqueProtagonists As New Collection
+    Dim header As String
+    Dim wsSource As Worksheet
+    Dim wsReleaseYearStats As Worksheet
+    Dim releaseYear As Integer
+    Dim yearCount As Object
+    Dim decadeCount As Object
+    Dim yearKey As Variant
+    Dim decadeKey As Variant
+    Dim decade As String
+    Dim i As Long
+    
+    Set mainSheet = ThisWorkbook.Sheets("Main Movie Sheet")
+    Set directorSheet = ThisWorkbook.Sheets("Director Stats")
+    Set producerSheet = ThisWorkbook.Sheets("Producer Stats")
+    Set writerSheet = ThisWorkbook.Sheets("Writer Stats")
+    Set actorSheet = ThisWorkbook.Sheets("Actor Stats")
+    Set genreSheet = ThisWorkbook.Sheets("Genre Stats")
+    Set cinematographerSheet = ThisWorkbook.Sheets("Cinematographer Stats")
+    Set editorSheet = ThisWorkbook.Sheets("Editor Stats")
+    Set composerSheet = ThisWorkbook.Sheets("Composer Stats")
+    Set protagonistSheet = ThisWorkbook.Sheets("Protagonist Stats")
+    Set productionSheet = ThisWorkbook.Sheets("Production Stats")
+    Set distributorSheet = ThisWorkbook.Sheets("Distributor Stats")
+    Set countrySheet = ThisWorkbook.Sheets("Country Stats")
+    Set franchiseSheet = ThisWorkbook.Sheets("Franchise Stats")
+    Set placeSheet = ThisWorkbook.Sheets("Place Stats")
+    Set ratingSheet = ThisWorkbook.Sheets("Rating Stats")
+    Set oscarSheet = ThisWorkbook.Sheets("Oscar Stats")
+    Set releaseSheet = ThisWorkbook.Sheets("Release Stats")
+    Set wsSource = ThisWorkbook.Sheets("Main Movie Sheet")
+    Set wsReleaseYearStats = ThisWorkbook.Sheets("Release Year Stats")
+    Set yearCount = CreateObject("Scripting.Dictionary")
+    Set decadeCount = CreateObject("Scripting.Dictionary")
+    
+    header = "Director's Name"
+    directorSheet.Range("A2:A" & directorSheet.Cells(directorSheet.Rows.Count, "A").End(xlUp).Row).ClearContents
+    directorSheet.Cells(1, "A").value = header
+    
+    producerSheet.Range("A2:A" & producerSheet.Cells(producerSheet.Rows.Count, "A").End(xlUp).Row).ClearContents
+    producerSheet.Cells(1, "A").value = "Producer's Name"
+    
+    writerSheet.Range("A2:A" & writerSheet.Cells(writerSheet.Rows.Count, "A").End(xlUp).Row).ClearContents
+    writerSheet.Cells(1, "A").value = "Writer's Name"
+    
+    actorSheet.Range("A2:A" & actorSheet.Cells(actorSheet.Rows.Count, "A").End(xlUp).Row).ClearContents
+    actorSheet.Cells(1, "A").value = "Actor's Name"
+    
+    genreSheet.Range("A2:A" & genreSheet.Cells(genreSheet.Rows.Count, "A").End(xlUp).Row).ClearContents
+    genreSheet.Cells(1, "A").value = "Genre"
+    
+    cinematographerSheet.Range("A2:A" & cinematographerSheet.Cells(cinematographerSheet.Rows.Count, "A").End(xlUp).Row).ClearContents
+    cinematographerSheet.Cells(1, "A").value = "Cinematographer's Name"
+    
+    editorSheet.Range("A2:A" & editorSheet.Cells(editorSheet.Rows.Count, "A").End(xlUp).Row).ClearContents
+    editorSheet.Cells(1, "A").value = "Editor's Name"
+    
+    composerSheet.Range("A2:A" & composerSheet.Cells(composerSheet.Rows.Count, "A").End(xlUp).Row).ClearContents
+    composerSheet.Cells(1, "A").value = "Composer's Name"
+    
+    protagonistSheet.Range("A2:A" & protagonistSheet.Cells(protagonistSheet.Rows.Count, "A").End(xlUp).Row).ClearContents
+    protagonistSheet.Cells(1, "A").value = "Protagonist's Name"
+    
+    productionSheet.Range("A2:A" & productionSheet.Cells(productionSheet.Rows.Count, "A").End(xlUp).Row).ClearContents
+    productionSheet.Cells(1, "A").value = "Production Company"
+    
+    distributorSheet.Range("A2:A" & distributorSheet.Cells(distributorSheet.Rows.Count, "A").End(xlUp).Row).ClearContents
+    distributorSheet.Cells(1, "A").value = "Distributor"
+    
+    countrySheet.Range("A2:A" & countrySheet.Cells(countrySheet.Rows.Count, "A").End(xlUp).Row).ClearContents
+    countrySheet.Cells(1, "A").value = "Country"
+    
+    franchiseSheet.Range("A2:A" & franchiseSheet.Cells(franchiseSheet.Rows.Count, "A").End(xlUp).Row).ClearContents
+    franchiseSheet.Cells(1, "A").value = "Franchise"
+    
+    placeSheet.Range("A2:A" & placeSheet.Cells(placeSheet.Rows.Count, "A").End(xlUp).Row).ClearContents
+    placeSheet.Cells(1, "A").value = "Place in Series"
+    
+    ratingSheet.Range("A2:A" & ratingSheet.Cells(ratingSheet.Rows.Count, "A").End(xlUp).Row).ClearContents
+    ratingSheet.Cells(1, "A").value = "Rating"
+    
+    oscarSheet.Range("A2:A" & oscarSheet.Cells(oscarSheet.Rows.Count, "A").End(xlUp).Row).ClearContents
+    oscarSheet.Cells(1, "A").value = "Oscar Category"
+    
+    releaseSheet.Range("A2:A" & releaseSheet.Cells(releaseSheet.Rows.Count, "A").End(xlUp).Row).ClearContents
+    releaseSheet.Cells(1, "A").value = "Release Type"
+       
+    For Each cell In mainSheet.Range("D2:D" & mainSheet.Cells(mainSheet.Rows.Count, "D").End(xlUp).Row)
+        For Each value In Split(cell.value, ",")
+            value = Trim(value)
+            valueCount = Application.WorksheetFunction.CountIf(mainSheet.Range("D:D"), "*" & value & "*")
+            If valueCount >= 3 Then
+                If Not IsValueInCollection(uniqueDirectors, value) Then
+                    uniqueDirectors.Add value
+                    If Not IsValueInColumnA(directorSheet, value) Then
+                        directorSheet.Cells(directorSheet.Rows.Count, "A").End(xlUp).Offset(1, 0).value = value
+                    End If
+                End If
+            End If
+        Next value
+    Next cell
+    
+    For Each cell In mainSheet.Range("F2:F" & mainSheet.Cells(mainSheet.Rows.Count, "F").End(xlUp).Row)
+        For Each value In Split(cell.value, ",")
+            value = Trim(value)
+            valueCount = Application.WorksheetFunction.CountIf(mainSheet.Range("F:F"), "*" & value & "*")
+            If valueCount >= 3 Then
+                If Not IsValueInCollection(uniqueProducers, value) Then
+                    uniqueProducers.Add value
+                    If Not IsValueInColumnA(producerSheet, value) Then
+                        producerSheet.Cells(producerSheet.Rows.Count, "A").End(xlUp).Offset(1, 0).value = value
+                    End If
+                End If
+            End If
+        Next value
+    Next cell
+    
+    For Each cell In mainSheet.Range("E2:E" & mainSheet.Cells(mainSheet.Rows.Count, "E").End(xlUp).Row)
+        For Each value In Split(cell.value, ",")
+            value = Trim(value)
+            valueCount = Application.WorksheetFunction.CountIf(mainSheet.Range("E:E"), "*" & value & "*")
+            If valueCount >= 3 Then
+                If Not IsValueInCollection(uniqueWriters, value) Then
+                    uniqueWriters.Add value
+                    If Not IsValueInColumnA(writerSheet, value) Then
+                        writerSheet.Cells(writerSheet.Rows.Count, "A").End(xlUp).Offset(1, 0).value = value
+                    End If
+                End If
+            End If
+        Next value
+    Next cell
+    
+    For Each cell In mainSheet.Range("H2:H" & mainSheet.Cells(mainSheet.Rows.Count, "H").End(xlUp).Row)
+        For Each value In Split(cell.value, ",")
+            value = Trim(value)
+            valueCount = Application.WorksheetFunction.CountIf(mainSheet.Range("H:H"), "*" & value & "*")
+            If valueCount >= 3 Then
+                If Not IsValueInCollection(uniqueActors, value) Then
+                    uniqueActors.Add value
+                    If Not IsValueInColumnA(actorSheet, value) Then
+                        actorSheet.Cells(actorSheet.Rows.Count, "A").End(xlUp).Offset(1, 0).value = value
+                    End If
+                End If
+            End If
+        Next value
+    Next cell
+    
+    For Each cell In mainSheet.Range("C2:C" & mainSheet.Cells(mainSheet.Rows.Count, "C").End(xlUp).Row)
+        For Each value In Split(cell.value, ",")
+            value = Trim(value)
+            valueCount = Application.WorksheetFunction.CountIf(mainSheet.Range("C:C"), "*" & value & "*")
+            If valueCount >= 3 Then
+                If Not IsValueInCollection(uniqueGenres, value) Then
+                    uniqueGenres.Add value
+                    If Not IsValueInColumnA(genreSheet, value) Then
+                        genreSheet.Cells(genreSheet.Rows.Count, "A").End(xlUp).Offset(1, 0).value = value
+                    End If
+                End If
+            End If
+        Next value
+    Next cell
+    
+    For Each cell In mainSheet.Range("I2:I" & mainSheet.Cells(mainSheet.Rows.Count, "I").End(xlUp).Row)
+        For Each value In Split(cell.value, ",")
+            value = Trim(value)
+            valueCount = Application.WorksheetFunction.CountIf(mainSheet.Range("I:I"), "*" & value & "*")
+            If valueCount >= 3 Then
+                If Not IsValueInCollection(uniqueCinematographers, value) Then
+                    uniqueCinematographers.Add value
+                    If Not IsValueInColumnA(cinematographerSheet, value) Then
+                        cinematographerSheet.Cells(cinematographerSheet.Rows.Count, "A").End(xlUp).Offset(1, 0).value = value
+                    End If
+                End If
+            End If
+        Next value
+    Next cell
+    
+    For Each cell In mainSheet.Range("J2:J" & mainSheet.Cells(mainSheet.Rows.Count, "J").End(xlUp).Row)
+        For Each value In Split(cell.value, ",")
+            value = Trim(value)
+            valueCount = Application.WorksheetFunction.CountIf(mainSheet.Range("J:J"), "*" & value & "*")
+            If valueCount >= 3 Then
+                If Not IsValueInCollection(uniqueEditors, value) Then
+                    uniqueEditors.Add value
+                    If Not IsValueInColumnA(editorSheet, value) Then
+                        editorSheet.Cells(editorSheet.Rows.Count, "A").End(xlUp).Offset(1, 0).value = value
+                    End If
+                End If
+            End If
+        Next value
+    Next cell
+
+    For Each cell In mainSheet.Range("K2:K" & mainSheet.Cells(mainSheet.Rows.Count, "K").End(xlUp).Row)
+        For Each value In Split(cell.value, ",")
+            value = Trim(value)
+            valueCount = Application.WorksheetFunction.CountIf(mainSheet.Range("K:K"), "*" & value & "*")
+            If valueCount >= 3 Then
+                If Not IsValueInCollection(uniqueComposers, value) Then
+                    uniqueComposers.Add value
+                    If Not IsValueInColumnA(composerSheet, value) Then
+                        composerSheet.Cells(composerSheet.Rows.Count, "A").End(xlUp).Offset(1, 0).value = value
+                    End If
+                End If
+            End If
+        Next value
+    Next cell
+    
+    For Each cell In mainSheet.Range("G2:G" & mainSheet.Cells(mainSheet.Rows.Count, "G").End(xlUp).Row)
+        For Each value In Split(cell.value, ",")
+            value = Trim(value)
+            valueCount = Application.WorksheetFunction.CountIf(mainSheet.Range("G:G"), "*" & value & "*")
+            If valueCount >= 3 Then
+                If Not IsValueInCollection(uniqueProtagonists, value) Then
+                    uniqueProtagonists.Add value
+                    If Not IsValueInColumnA(protagonistSheet, value) Then
+                        protagonistSheet.Cells(protagonistSheet.Rows.Count, "A").End(xlUp).Offset(1, 0).value = value
+                    End If
+                End If
+            End If
+        Next value
+    Next cell
+    
+    For Each cell In mainSheet.Range("L2:L" & mainSheet.Cells(mainSheet.Rows.Count, "L").End(xlUp).Row)
+        For Each value In Split(cell.value, ",")
+            value = Trim(value)
+            valueCount = Application.WorksheetFunction.CountIf(mainSheet.Range("L:L"), "*" & value & "*")
+            If valueCount >= 3 Then
+                If Not IsValueInCollection(uniqueProduction, value) Then
+                    uniqueProduction.Add value
+                    If Not IsValueInColumnA(productionSheet, value) Then
+                        productionSheet.Cells(productionSheet.Rows.Count, "A").End(xlUp).Offset(1, 0).value = value
+                    End If
+                End If
+            End If
+        Next value
+    Next cell
+    
+    For Each cell In mainSheet.Range("M2:M" & mainSheet.Cells(mainSheet.Rows.Count, "M").End(xlUp).Row)
+        For Each value In Split(cell.value, ",")
+            value = Trim(value)
+            valueCount = Application.WorksheetFunction.CountIf(mainSheet.Range("M:M"), "*" & value & "*")
+            If valueCount >= 3 Then
+                If Not IsValueInCollection(uniqueDistributors, value) Then
+                    uniqueDistributors.Add value
+                    If Not IsValueInColumnA(distributorSheet, value) Then
+                        distributorSheet.Cells(distributorSheet.Rows.Count, "A").End(xlUp).Offset(1, 0).value = value
+                    End If
+                End If
+            End If
+        Next value
+    Next cell
+    
+    For Each cell In mainSheet.Range("N2:N" & mainSheet.Cells(mainSheet.Rows.Count, "N").End(xlUp).Row)
+        For Each value In Split(cell.value, ",")
+            value = Trim(value)
+            valueCount = Application.WorksheetFunction.CountIf(mainSheet.Range("N:N"), "*" & value & "*")
+            If valueCount >= 3 Then
+                If Not IsValueInCollection(uniqueCountries, value) Then
+                    uniqueCountries.Add value
+                    If Not IsValueInColumnA(countrySheet, value) Then
+                        countrySheet.Cells(countrySheet.Rows.Count, "A").End(xlUp).Offset(1, 0).value = value
+                    End If
+                End If
+            End If
+        Next value
+    Next cell
+    
+    For Each cell In mainSheet.Range("Y2:Y" & mainSheet.Cells(mainSheet.Rows.Count, "Y").End(xlUp).Row)
+        For Each value In Split(cell.value, ",")
+            value = Trim(value)
+            valueCount = Application.WorksheetFunction.CountIf(mainSheet.Range("Y:Y"), "*" & value & "*")
+            If valueCount >= 3 Then
+                If Not IsValueInCollection(uniqueFranchises, value) Then
+                    uniqueFranchises.Add value
+                    If Not IsValueInColumnA(franchiseSheet, value) Then
+                        franchiseSheet.Cells(franchiseSheet.Rows.Count, "A").End(xlUp).Offset(1, 0).value = value
+                    End If
+                End If
+            End If
+        Next value
+    Next cell
+    
+    For Each cell In mainSheet.Range("Z2:Z" & mainSheet.Cells(mainSheet.Rows.Count, "Z").End(xlUp).Row)
+        For Each value In Split(cell.value, ",")
+            value = Trim(value)
+            valueCount = Application.WorksheetFunction.CountIf(mainSheet.Range("Z:Z"), "*" & value & "*")
+            If valueCount >= 3 Then
+                If Not IsValueInCollection(uniquePlaces, value) Then
+                    uniquePlaces.Add value
+                    If Not IsValueInColumnA(placeSheet, value) Then
+                        placeSheet.Cells(placeSheet.Rows.Count, "A").End(xlUp).Offset(1, 0).value = value
+                    End If
+                End If
+            End If
+        Next value
+    Next cell
+    
+    For Each cell In mainSheet.Range("AA2:AA" & mainSheet.Cells(mainSheet.Rows.Count, "AA").End(xlUp).Row)
+        For Each value In Split(cell.value, ",")
+            value = Trim(value)
+            valueCount = Application.WorksheetFunction.CountIf(mainSheet.Range("AA:AA"), "*" & value & "*")
+            If valueCount >= 3 Then
+                If Not IsValueInCollection(uniqueRatings, value) Then
+                    uniqueRatings.Add value
+                    If Not IsValueInColumnA(ratingSheet, value) Then
+                        ratingSheet.Cells(ratingSheet.Rows.Count, "A").End(xlUp).Offset(1, 0).value = value
+                    End If
+                End If
+            End If
+        Next value
+    Next cell
+    
+For Each cell In mainSheet.Range("AB2:AB" & mainSheet.Cells(mainSheet.Rows.Count, "AB").End(xlUp).Row)
+    ' Track whether the movie had any nomination or win
+    anyNominee = False
+    anyWinner = False
+
+    ' Loop through the comma-separated list of awards in the cell
+    For Each value In Split(cell.value, ",")
+        value = Trim(value)
+        valueCount = Application.WorksheetFunction.CountIf(mainSheet.Range("AB:AB"), "*" & value & "*")
+        
+        ' Count each unique nomination and win
+        If valueCount >= 3 Then
+            If Not IsValueInCollection(uniqueOscars, value) Then
+                uniqueOscars.Add value
+                If Not IsValueInColumnA(oscarSheet, value) Then
+                    oscarSheet.Cells(oscarSheet.Rows.Count, "A").End(xlUp).Offset(1, 0).value = value
+                End If
+            End If
+        End If
+
+        ' Check if "Nominee" or "Winner" exists in the current award string
+        If InStr(value, "Nominee") > 0 Then
+            anyNominee = True
+        End If
+        If InStr(value, "Winner") > 0 Then
+            anyWinner = True
+        End If
+    Next value
+
+    ' Track movies with any nominations or wins
+    If anyNominee Then
+        If Not IsValueInCollection(uniqueOscars, "Nominee") Then
+            uniqueOscars.Add "Nominee"
+            If Not IsValueInColumnA(oscarSheet, "Nominee") Then
+                oscarSheet.Cells(oscarSheet.Rows.Count, "A").End(xlUp).Offset(1, 0).value = "Nominee"
+            End If
+        End If
+    End If
+
+    If anyWinner Then
+        If Not IsValueInCollection(uniqueOscars, "Winner") Then
+            uniqueOscars.Add "Winner"
+            If Not IsValueInColumnA(oscarSheet, "Winner") Then
+                oscarSheet.Cells(oscarSheet.Rows.Count, "A").End(xlUp).Offset(1, 0).value = "Winner"
+            End If
+        End If
+    End If
+Next cell
+
+    
+    For Each cell In mainSheet.Range("AC2:AC" & mainSheet.Cells(mainSheet.Rows.Count, "AC").End(xlUp).Row)
+        For Each value In Split(cell.value, ",")
+            value = Trim(value)
+            valueCount = Application.WorksheetFunction.CountIf(mainSheet.Range("AC:AC"), "*" & value & "*")
+            If valueCount >= 3 Then
+                If Not IsValueInCollection(uniqueReleases, value) Then
+                    uniqueReleases.Add value
+                    If Not IsValueInColumnA(releaseSheet, value) Then
+                        releaseSheet.Cells(releaseSheet.Rows.Count, "A").End(xlUp).Offset(1, 0).value = value
+                    End If
+                End If
+            End If
+        Next value
+    Next cell
+    
+    
+    lastRow = wsReleaseYearStats.Cells(wsReleaseYearStats.Rows.Count, "A").End(xlUp).Row
+    If lastRow > 1 Then
+        wsReleaseYearStats.Range("A2:A" & lastRow).ClearContents
+        wsReleaseYearStats.Range("F2:F" & lastRow).ClearContents
+    End If
+    
+            For Each cell In wsSource.Range("O2:O" & wsSource.Cells(wsSource.Rows.Count, "O").End(xlUp).Row)
+        If IsDate(cell.value) Then
+            releaseYear = year(cell.value)
+            
+            If yearCount.Exists(releaseYear) Then
+                yearCount(releaseYear) = yearCount(releaseYear) + 1
+            Else
+                yearCount.Add releaseYear, 1
+            End If
+            
+            decade = CStr((releaseYear \ 10) * 10) & "s"
+            If decadeCount.Exists(decade) Then
+                decadeCount(decade) = decadeCount(decade) + 1
+            Else
+                decadeCount.Add decade, 1
+            End If
+        End If
+    Next cell
+
+    i = wsReleaseYearStats.Cells(wsReleaseYearStats.Rows.Count, 1).End(xlUp).Row + 1
+    If i < 2 Then i = 2
+    
+    For Each yearKey In yearCount.Keys
+        If yearCount(yearKey) > 3 Then
+            wsReleaseYearStats.Cells(i, 1).value = yearKey
+            wsReleaseYearStats.Cells(i, 6).value = yearCount(yearKey)
+            i = i + 1
+        End If
+    Next yearKey
+
+    For Each decadeKey In decadeCount.Keys
+        If decadeCount(decadeKey) > 3 Then
+            wsReleaseYearStats.Cells(i, 1).value = decadeKey
+            wsReleaseYearStats.Cells(i, 6).value = decadeCount(decadeKey)
+            i = i + 1
+        End If
+    Next decadeKey
+End Sub
+
+Function IsValueInCollection(coll As Collection, val As Variant) As Boolean
+    On Error Resume Next
+    IsValueInCollection = Not IsEmpty(coll(val))
+    On Error GoTo 0
+End Function
+
+Function IsValueInColumnA(ws As Worksheet, val As Variant) As Boolean
+    On Error Resume Next
+    IsValueInColumnA = Not IsError(Application.Match(val, ws.Columns("A"), 0))
+    On Error GoTo 0
+End Function
+
+
+
+
+
+
